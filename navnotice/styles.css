@@ -1,0 +1,24 @@
+#page-admin-local-navnotice-manage .hiddenSetting {
+    display: none;
+}
+
+#page-admin-local-navnotice-manage .card {
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 10px;
+}
+
+#page-admin-local-navnotice-manage .card-actions .btn {
+    margin-right: 5px;
+    padding: 8px;
+}
+
+#page-admin-local-navnotice-manage .fa {
+    padding: 5px;
+}
+
+.navicon.fa {
+    margin-right:5px;
+}
