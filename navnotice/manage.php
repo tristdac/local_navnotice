@@ -125,7 +125,7 @@ foreach ($entries as $entry) {
     echo html_writer::start_div('card-actions text-right mt-2');
     echo html_writer::link(new moodle_url('/local/navnotice/manage.php', ['edit' => $entry->id], 'formContainer'), 
         html_writer::tag('i', '', ['class' => 'fa fa-pencil fa-lg']),
-        ['class' => 'btn btn-primary btn-sm mr-1', 'title' => get_string('edit')]
+        ['class' => 'btn btn-dark btn-sm mr-1', 'title' => get_string('edit')]
     );
     echo html_writer::link(new moodle_url('/local/navnotice/manage.php', ['delete' => $entry->id]), 
         html_writer::tag('i', '', ['class' => 'fa fa-trash fa-lg']),
@@ -202,6 +202,52 @@ echo html_writer::script("
                 alerttypeElement.style.display = 'flex';
             }
         }
+            const selectTypeElement = document.getElementById('id_type');
+    const selectAlertTypeElement = document.getElementById('id_alerttype');
+
+    // Function to update class on the contenteditable element
+    function updateClass() {
+        const contentEditableElement = document.querySelector('#id_contenteditable');
+        if (contentEditableElement) {
+            // Remove existing alert classes
+            contentEditableElement.classList.remove('alert-info', 'alert-success', 'alert-warning', 'alert-danger');
+
+            // Add new class based on the selected alert type option
+            const selectedAlertValue = selectAlertTypeElement.value;
+            const alertClass = 'alert-' + selectedAlertValue;
+            contentEditableElement.classList.add(alertClass);
+
+            // Update CSS styles
+            contentEditableElement.style.minHeight = '80px';
+            contentEditableElement.style.height = '80px';
+            contentEditableElement.style.padding = '.75rem 1.25rem';
+            contentEditableElement.style.border = '1px solid #8f959e';
+        }
+    }
+
+    // Monitor the DOM for changes and apply the class update if the contenteditable element exists
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.addedNodes) {
+                updateClass();
+            }
+        });
+    });
+
+    // Configuration for the observer (which parts of the DOM to monitor)
+    const config = { childList: true, subtree: true };
+    // Start observing the body for added elements
+    observer.observe(document.body, config);
+
+    // Handle type dropdown changes that may affect the rendering of contenteditable
+    selectTypeElement.addEventListener('change', function() {
+        if (this.value === 'notification') {
+            updateClass();
+        }
+    });
+
+    // Ensure the class is updated based on initial load and dropdown changes
+    selectAlertTypeElement.addEventListener('change', updateClass);
     });
 ");
 
