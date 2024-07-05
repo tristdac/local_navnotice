@@ -34,12 +34,12 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configtext('local_navnotice/student_email_pattern',
         get_string('studentemailpattern', 'local_navnotice'),
         get_string('studentemailpatterndesc', 'local_navnotice'),
-        '^ec\d+@edinburghcollege.ac.uk$'));
+        '^ec\d+@mydomain.com$'));
 
     $settings->add(new admin_setting_configtext('local_navnotice/staff_email_pattern',
         get_string('staffemailpattern', 'local_navnotice'),
         get_string('staffemailpatterndesc', 'local_navnotice'),
-        '^[a-z]+\.[a-z]+@edinburghcollege.ac.uk$'));
+        '^[a-z]+\.[a-z]+@mydomain.com$'));
 
     // Link to manage page
     $url = new moodle_url('/local/navnotice/manage.php');
@@ -50,7 +50,7 @@ if ($hassiteconfig) {
     $ADMIN->add('root', new admin_category('local_navnotice_category', new lang_string('pluginname', 'local_navnotice')));
     $settingspage = new admin_externalpage('local_navnotice_manage', get_string('managesettings', 'local_navnotice'),
         new moodle_url('/local/navnotice/manage.php'),
-        'local/navnotice:manage'); // Ensure the capability exists and is assigned appropriately.
+        'local/navnotice:manage');
 
     $ADMIN->add('local_navnotice_category', $settingspage);
 

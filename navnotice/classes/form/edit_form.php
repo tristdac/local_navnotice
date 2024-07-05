@@ -37,6 +37,7 @@ class manage_navnotice_form extends moodleform {
         $mform->setType('type', PARAM_TEXT);
 
         $mform->addElement('select', 'usertype', get_string('usertype', 'local_navnotice'), [
+            'all' => get_string('all', 'local_navnotice'),
             'student' => get_string('student', 'local_navnotice'),
             'staff' => get_string('staff', 'local_navnotice'),
             'external' => get_string('external', 'local_navnotice')
@@ -54,10 +55,12 @@ class manage_navnotice_form extends moodleform {
         $mform->addElement('text', 'icon', get_string('icon', 'local_navnotice'));
         $mform->setType('icon', PARAM_TEXT);
         $mform->hideIf('icon', 'type', 'neq', 'navitem');
+        $mform->addHelpButton('icon', 'icon', 'local_navnotice');
 
         $mform->addElement('editor', 'content', get_string('content', 'local_navnotice'));
         $mform->setType('content', PARAM_RAW);
         $mform->hideIf('content', 'type', 'neq', 'notification');
+        $mform->addHelpButton('content', 'content', 'local_navnotice');
 
         $mform->addElement('select', 'alerttype', get_string('alerttype', 'local_navnotice'), [
             'info' => get_string('info', 'local_navnotice'),
@@ -73,11 +76,6 @@ class manage_navnotice_form extends moodleform {
 
     function definition_after_data() {
         parent::definition_after_data();
-
-        // Check if we are editing an existing item
-        if ($this->_customdata['is_editing']) {
-            // $this->_form->getElement('type')->setAttributes(['readonly' => 'readonly']);
-        }
 
         // Ensure the initial visibility of fields is correct
         $this->update_visibility($this->_form->getElement('type')->getValue());

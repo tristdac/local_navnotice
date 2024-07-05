@@ -59,24 +59,24 @@ function local_navnotice_before_http_headers() {
     }
 
     // Fetch navbar items and notifications from the database
-    $items = $DB->get_records('local_navnotice_items', ['usertype' => $user_type_class]);
+    $items = $DB->get_records('local_navnotice_items');
 
     foreach ($items as $item) {
-        if ($item->type === 'navitem' && isloggedin() && !isguestuser()) {
-            // Adding navbar items
-            add_navbar_item($item->title, $item->url, $item->icon);
-        } elseif ($item->type === 'notification') {
-            // Adding notifications
-            add_notification($item->content, $item->alerttype);
+        // Show to all users or specific user type
+        if ($item->usertype === 'all' || $item->usertype === $user_type_class) {
+            if ($item->type === 'navitem' && isloggedin() && !isguestuser()) {
+                // Adding navbar items
+                add_navbar_item($item->title, $item->url, $item->icon);
+            } elseif ($item->type === 'notification') {
+                // Adding notifications
+                add_notification($item->content, $item->alerttype);
+            }
         }
     }
 }
 
 function add_navbar_item($text, $url, $icon) {
     global $PAGE;
-
-    // Debugging output
-    error_log("Adding navbar item: Text = $text, URL = $url, Icon = $icon");
 
     // Render Font Awesome icon as HTML if provided
     if (!empty($icon)) {
@@ -96,9 +96,6 @@ function add_navbar_item($text, $url, $icon) {
         $node->showinflatnavigation = true; // Make sure it shows up in the flat navigation (Boost-based themes).
         // Debugging output
         error_log("Navbar item added: Text = $text, URL = $url");
-    } else {
-        // Debugging output
-        error_log("Failed to add navbar item: Text = $text, URL = $url");
     }
 
     // Ensure the navigation is initialized
@@ -114,7 +111,7 @@ function add_notification($message, $type) {
         case 'warning':
             $notification_type = \core\output\notification::NOTIFY_WARNING;
             break;
-        case 'error':
+        case 'danger':
             $notification_type = \core\output\notification::NOTIFY_ERROR;
             break;
         default:

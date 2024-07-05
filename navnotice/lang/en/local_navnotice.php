@@ -23,12 +23,14 @@
 
 $string['pluginname'] = 'Nav Notice';
 $string['content'] = 'Content';
+$string['content_help'] = '<p>Margin is added to the bottom of paragraph text, and various other types of HTML tags. This will prevent vertical alignment of your notification content.</p><p>Use the HTML editor to either remove outer tags or add <strong>style="margin:0px;"</strong> to the outer tag.</p>';
 $string['managesettings'] = 'Manage Navigation and Notifications';
 $string['enable'] = "Enable Plugin";
 $string['type'] = 'Type';
 $string['title'] = 'Title';
 $string['url'] = 'URL';
 $string['icon'] = 'Icon';
+$string['icon_help'] = '<p>Select an icon from the available <a href="https://fontawesome.com/v4.7.0/icons/" target="_blank">FontAwesome 4 icons</a>. Ensure you use the correct class name. (E.g. "fa-mobile")</p>';
 $string['enabledesc'] = 'Enable or disable the Nav Notice plugin';
 $string['additem'] = 'Add Item';
 $string['usertype'] = 'User Type';
@@ -37,6 +39,7 @@ $string['edit'] = 'Edit';
 $string['delete'] = 'Delete';
 $string['navitem'] = 'Navbar Item';
 $string['notification'] = 'Notification';
+$string['all'] = 'All Users';
 $string['student'] = 'Student';
 $string['staff'] = 'Staff';
 $string['external'] = 'External';

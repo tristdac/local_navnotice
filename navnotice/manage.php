@@ -73,7 +73,7 @@ if ($mform->is_cancelled()) {
     redirect(new moodle_url('/local/navnotice/manage.php'));
 } else if ($fromform = $mform->get_data()) {
     $record = new stdClass();
-    $record->type = $fromform->type; // Use the hidden type field value
+    $record->type = $fromform->type;
     $record->usertype = $fromform->usertype;
     $record->title = $fromform->title;
     $record->url = $fromform->url;
@@ -95,6 +95,8 @@ if ($mform->is_cancelled()) {
         // Updating existing record
         $record->id = $fromform->id;
         $DB->update_record('local_navnotice_items', $record);
+        global $SESSION;
+        unset($SESSION->notifications);
     }
     redirect(new moodle_url('/local/navnotice/manage.php'));
 }
@@ -103,17 +105,20 @@ if ($mform->is_cancelled()) {
 $entries = $DB->get_records('local_navnotice_items');
 foreach ($entries as $entry) {
     echo html_writer::start_div('entry card mb-3 p-3');
-    echo html_writer::div('Type: ' . $entry->type, 'mb-1');
-    echo html_writer::div('User Type: ' . $entry->usertype, 'mb-1');
+    echo html_writer::div('<strong>Type:</strong> ' . $entry->type, 'mb-1 cap');
+    echo html_writer::div('<strong>User Type:</strong> ' . $entry->usertype, 'mb-1 cap');
 
     if ($entry->type === 'navitem') {
-        echo html_writer::div('Title: ' . $entry->title, 'mb-1');
-        echo html_writer::div('URL: ' . $entry->url, 'mb-1');
-        echo html_writer::div('Icon: ' . $entry->icon, 'mb-1');
+        echo html_writer::div('<strong>Title:</strong> ' . $entry->title, 'mb-1 cap');
+        echo html_writer::div('<strong>URL:</strong> ' . '<a href="'.$entry->url.'" target="_blank">'.$entry->url.'</a>', 'mb-1');
+        echo html_writer::div('<strong>Icon:</strong> ' . (!empty($entry->icon) ? '<i class="fa ' . $entry->icon . '"></i> ('. $entry->icon . ')' : 'None'), 'mb-1');
     } else if ($entry->type === 'notification') {
         // Use format_text to safely display HTML content
-        echo html_writer::div('Content: ' . format_text($entry->content, FORMAT_HTML), 'mb-1 content');
-        echo html_writer::div('Alert Type: ' . $entry->alerttype, 'mb-1');
+        echo html_writer::div('<strong>Alert Type:</strong> ' . $entry->alerttype, 'mb-1 cap');
+        echo html_writer::empty_tag('br');
+        echo html_writer::start_div('alert alert-'.$entry->alerttype);
+        echo html_writer::div(format_text($entry->content, FORMAT_HTML));
+        echo html_writer::end_div();
     }
 
     // Icons for actions
@@ -133,7 +138,7 @@ foreach ($entries as $entry) {
 
 // Show add new button
 if (!$showform) {
-    echo html_writer::link(new moodle_url('/local/navnotice/manage.php', ['add' => 1]), 
+    echo html_writer::link(new moodle_url('/local/navnotice/manage.php', ['add' => 1], 'formContainer'), 
         get_string('additem', 'local_navnotice'), 
         ['class' => 'btn btn-success mb-3', 'id' => 'addNewItemButton']
     );
@@ -158,12 +163,8 @@ echo html_writer::script("
                     const form = document.getElementById('manageForm');
                     if (form) {
                         form.style.display = 'flex'; // Show the form
-                    } else {
-                        console.error('Form not found');
                     }
                     addBtn.style.display = 'none'; // Hide the add button
-                } else {
-                    console.error('Form container not found');
                 }
             });
         }

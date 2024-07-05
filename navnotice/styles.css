@@ -15,10 +15,14 @@
     padding: 8px;
 }
 
-#page-admin-local-navnotice-manage .fa {
+#page-admin-local-navnotice-manage .card-actions .fa {
     padding: 5px;
 }
 
 .navicon.fa {
     margin-right:5px;
+}
+
+#page-admin-local-navnotice-manage .entry.card.mb-3.p-3 .mb-1.cap {
+    text-transform: capitalize;
 }
