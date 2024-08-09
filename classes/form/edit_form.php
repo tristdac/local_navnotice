@@ -57,6 +57,10 @@ class manage_navnotice_form extends moodleform {
         $mform->hideIf('icon', 'type', 'neq', 'navitem');
         $mform->addHelpButton('icon', 'icon', 'local_navnotice');
 
+        $mform->addElement('text', 'navcolor', get_string('navcolor', 'local_navnotice'));
+        $mform->setType('navcolor', PARAM_RAW);
+        $mform->setDefault('navcolor', '#FFFFFF');
+
         $mform->addElement('editor', 'content', get_string('content', 'local_navnotice'));
         $mform->setType('content', PARAM_RAW);
         $mform->hideIf('content', 'type', 'neq', 'notification');
@@ -79,6 +83,7 @@ class manage_navnotice_form extends moodleform {
 
         // Ensure the initial visibility of fields is correct
         $this->update_visibility($this->_form->getElement('type')->getValue());
+
     }
 
     private function update_visibility($type) {
@@ -88,12 +93,14 @@ class manage_navnotice_form extends moodleform {
             $mform->getElement('title')->setAttributes(['style' => 'display:flex;']);
             $mform->getElement('url')->setAttributes(['style' => 'display:flex;']);
             $mform->getElement('icon')->setAttributes(['style' => 'display:flex;']);
+            $mform->getElement('navcolor')->setAttributes(['style' => 'display:flex;']);
             $mform->getElement('content')->setAttributes(['style' => 'display:none;']);
             $mform->getElement('alerttype')->setAttributes(['style' => 'display:none;']);
         } else if ($type == 'notification') {
             $mform->getElement('title')->setAttributes(['style' => 'display:none;']);
             $mform->getElement('url')->setAttributes(['style' => 'display:none;']);
             $mform->getElement('icon')->setAttributes(['style' => 'display:none;']);
+            $mform->getElement('navcolor')->setAttributes(['style' => 'display:none;']);
             $mform->getElement('content')->setAttributes(['style' => 'display:flex;']);
             $mform->getElement('alerttype')->setAttributes(['style' => 'display:flex;']);
         }

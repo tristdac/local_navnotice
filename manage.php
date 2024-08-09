@@ -75,18 +75,24 @@ if ($mform->is_cancelled()) {
     $record = new stdClass();
     $record->type = $fromform->type;
     $record->usertype = $fromform->usertype;
-    $record->title = $fromform->title;
-    $record->url = $fromform->url;
-    $record->icon = $fromform->icon;
 
-    // Extracting text part from the editor content
-    if (isset($fromform->content) && is_array($fromform->content)) {
-        $record->content = $fromform->content['text'];
-    } else {
-        $record->content = '';
-    }
+    // Handling title
+    $record->title = !empty($fromform->title) ? $fromform->title : NULL;
 
-    $record->alerttype = $fromform->alerttype;
+    // Handling URL
+    $record->url = !empty($fromform->url) ? $fromform->url : NULL;
+
+    // Handling navcolor
+    $record->navcolor = !empty($fromform->navcolor) ? $fromform->navcolor : NULL;
+
+    // Handling editor content
+    $record->icon = !empty($fromform->icon) ? $fromform->icon : '';
+
+    // Handling editor content
+    $record->content = !empty($fromform->content['text']) ? $fromform->content['text'] : '';
+
+    // Handling alerttype
+    $record->alerttype = !empty($fromform->alerttype) ? $fromform->alerttype : NULL;
 
     if (empty($fromform->id)) {
         // Inserting new record
@@ -98,8 +104,11 @@ if ($mform->is_cancelled()) {
         global $SESSION;
         unset($SESSION->notifications);
     }
+
+    // Redirect after processing
     redirect(new moodle_url('/local/navnotice/manage.php'));
 }
+
 
 // Display existing entries with edit/delete options
 $entries = $DB->get_records('local_navnotice_items');
@@ -187,17 +196,20 @@ echo html_writer::script("
             const iconElement = document.getElementById('fitem_id_icon');
             const contentElement = document.getElementById('fitem_id_content');
             const alerttypeElement = document.getElementById('fitem_id_alerttype');
+            const navcolorElement = document.getElementById('fitem_id_navcolor');
 
             if (type === 'navitem') {
                 titleElement.style.display = 'flex';
                 urlElement.style.display = 'flex';
                 iconElement.style.display = 'flex';
+                navcolorElement.style.display = 'flex';
                 contentElement.style.display = 'none';
                 alerttypeElement.style.display = 'none';
             } else if (type === 'notification') {
                 titleElement.style.display = 'none';
                 urlElement.style.display = 'none';
                 iconElement.style.display = 'none';
+                navcolorElement.style.display = 'none';
                 contentElement.style.display = 'flex';
                 alerttypeElement.style.display = 'flex';
             }

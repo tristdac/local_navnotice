@@ -23,8 +23,27 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'local_navnotice';
-$plugin->version = 2024070300;
-$plugin->requires = 2020110900; // Moodle 3.10 or higher.
-$plugin->maturity = MATURITY_STABLE;
-$plugin->release = '1.0';
+function xmldb_local_navnotice_upgrade($oldversion) {
+    global $DB;
+
+    $dbman = $DB->get_manager();
+
+    if ($oldversion < 2024071200) {
+
+        // Define table local_navnotice_items to be altered.
+        $table = new xmldb_table('local_navnotice_items');
+
+        // Adding a new field to the table.
+        $field = new xmldb_field('navcolor', XMLDB_TYPE_CHAR, '50', null, null, null, null, 'url');
+
+        // Conditionally launch add field navcolor.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Navnotice savepoint reached.
+        upgrade_plugin_savepoint(true, 2024071200, 'local', 'navnotice');
+    }
+
+    return true;
+}

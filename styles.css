@@ -26,3 +26,8 @@
 #page-admin-local-navnotice-manage .entry.card.mb-3.p-3 .mb-1.cap {
     text-transform: capitalize;
 }
+
+#id_navcolor:invalid {
+    border-color: red;
+    /* Highlight invalid input */
+}

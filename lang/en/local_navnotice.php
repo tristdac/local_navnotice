@@ -31,6 +31,7 @@ $string['title'] = 'Title';
 $string['url'] = 'URL';
 $string['icon'] = 'Icon';
 $string['icon_help'] = '<p>Select an icon from the available <a href="https://fontawesome.com/v4.7.0/icons/" target="_blank">FontAwesome 4 icons</a>. Ensure you use the correct class name. (E.g. "fa-mobile")</p>';
+$string['navcolor'] = 'Select a background colour for this navigation item';
 $string['enabledesc'] = 'Enable or disable the Nav Notice plugin';
 $string['additem'] = 'Add Item';
 $string['usertype'] = 'User Type';

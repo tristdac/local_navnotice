@@ -30,6 +30,16 @@ function local_navnotice_before_http_headers() {
         return;
     }
 
+    // Get the current URL path from $_SERVER['REQUEST_URI']
+    $current_url = $_SERVER['REQUEST_URI'];
+    $url_path = parse_url($current_url, PHP_URL_PATH);
+
+    // Check if we are on the settings page
+    if ($url_path === '/local/navnotice/manage.php') {
+        // Include JavaScript for contrast checking
+        $PAGE->requires->js('/local/navnotice/js/check_contrast.js');
+    }
+
     // Function to determine user type from email
     if (!function_exists('get_user_type_from_email')) {
         function get_user_type_from_email($email) {
@@ -60,48 +70,77 @@ function local_navnotice_before_http_headers() {
 
     // Fetch navbar items and notifications from the database
     $items = $DB->get_records('local_navnotice_items');
+    $colorData = [];
 
     foreach ($items as $item) {
         // Show to all users or specific user type
         if ($item->usertype === 'all' || $item->usertype === $user_type_class) {
             if ($item->type === 'navitem' && isloggedin() && !isguestuser()) {
                 // Adding navbar items
-                add_navbar_item($item->title, $item->url, $item->icon);
+                add_navbar_item($item);
+                $colorData['navnotice-id-' . $item->id] = $item->navcolor;
             } elseif ($item->type === 'notification') {
                 // Adding notifications
                 add_notification($item->content, $item->alerttype);
             }
         }
     }
+
+    // Inline JavaScript injection
+    inject_nav_colors($colorData);
+    
 }
 
-function add_navbar_item($text, $url, $icon) {
+function inject_nav_colors($colorData) {
+    global $PAGE;
+    if (!empty($colorData)) {
+        $colors_json = json_encode($colorData);
+        $jsCode = <<<JS
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            var navItemColors = JSON.parse('$colors_json');
+            for (var key in navItemColors) {
+                var navItems = document.querySelectorAll('li[data-key="' + key + '"]');
+                navItems.forEach(function(navItem) {
+                    navItem.style.backgroundColor = navItemColors[key];
+                });
+            }
+        });
+        
+JS;
+        $PAGE->requires->js_init_code($jsCode);
+    }
+}
+
+function add_navbar_item($item) {
     global $PAGE;
 
     // Render Font Awesome icon as HTML if provided
-    if (!empty($icon)) {
-        $iconhtml = html_writer::tag('i', '', ['class' => 'navicon fa '.$icon, 'aria-hidden' => 'true']) . ' ';
+    if (!empty($item->icon)) {
+        $iconhtml = html_writer::tag('i', '', ['class' => 'navicon fa '.$item->icon, 'aria-hidden' => 'true']) . ' ';
     } else {
         $iconhtml = '';
     }
 
     // Add the node to the primary navigation
     $node = $PAGE->primarynav->add(
-        $iconhtml . $text, // Add icon HTML and text
-        new moodle_url($url),
+        $iconhtml . $item->title, // Add icon HTML and text
+        new moodle_url($item->url),
         navigation_node::TYPE_CUSTOM
     );
 
     if ($node) {
         $node->showinflatnavigation = true; // Make sure it shows up in the flat navigation (Boost-based themes).
-        // Debugging output
-        error_log("Navbar item added: Text = $text, URL = $url");
+        
+        // Add a custom data attribute to store the navcolor
+        $node->key = 'navnotice-id-'.$item->id;
+        $node->title = $item->title;
     }
 
     // Ensure the navigation is initialized
     $PAGE->navigation->initialise();
-}
 
+}
 
 function add_notification($message, $type) {
     switch ($type) {
