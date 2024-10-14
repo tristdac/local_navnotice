@@ -31,3 +31,13 @@
     border-color: red;
     /* Highlight invalid input */
 }
+
+li.nav-item[data-key^="navnotice-id-"] a.nav-link:hover {
+    background: initial;
+    color: initial;
+    filter: brightness(120%) !important;
+}
+
+body#page-mod-assign-grader #user-notifications {
+    display: none;
+}

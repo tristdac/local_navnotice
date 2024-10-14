@@ -23,8 +23,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'local_navnotice';
-$plugin->version = 2024071201;
-$plugin->requires = 2020110900; // Moodle 3.10 or higher.
-$plugin->maturity = MATURITY_STABLE;
-$plugin->release = '1.0';
+// Install script if any initial setup is needed.
+function xmldb_local_navnotice_install() {
+    // No specific install actions needed for this plugin.
+}

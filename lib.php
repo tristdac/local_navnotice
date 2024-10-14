@@ -30,87 +30,122 @@ function local_navnotice_before_http_headers() {
         return;
     }
 
-    // Get the current URL path from $_SERVER['REQUEST_URI']
-    $current_url = $_SERVER['REQUEST_URI'];
-    $url_path = parse_url($current_url, PHP_URL_PATH);
-
-    // Check if we are on the settings page
-    if ($url_path === '/local/navnotice/manage.php') {
-        // Include JavaScript for contrast checking
-        $PAGE->requires->js('/local/navnotice/js/check_contrast.js');
-    }
-
-    // Function to determine user type from email
-    if (!function_exists('get_user_type_from_email')) {
-        function get_user_type_from_email($email) {
-            $student_pattern = get_config('local_navnotice', 'student_email_pattern');
-            $staff_pattern = get_config('local_navnotice', 'staff_email_pattern');
-
-            if (preg_match("/$student_pattern/", $email)) {
-                return 'student';
-            } elseif (preg_match("/$staff_pattern/", $email)) {
-                return 'staff';
-            } else {
-                return 'external';
-            }
-        }
-    }
-
-    // Get the user type based on the email address
     if (isloggedin() && !isguestuser()) {
         $user_type_class = get_user_type_from_email($USER->email);
     } else {
         $user_type_class = 'external';
     }
 
-    // Inject the class into the body tag
     if ($user_type_class) {
         $PAGE->add_body_class($user_type_class);
     }
 
     // Fetch navbar items and notifications from the database
     $items = $DB->get_records('local_navnotice_items');
-    $colorData = [];
 
+    $navStyles = [];
     foreach ($items as $item) {
-        // Show to all users or specific user type
         if ($item->usertype === 'all' || $item->usertype === $user_type_class) {
             if ($item->type === 'navitem' && isloggedin() && !isguestuser()) {
-                // Adding navbar items
                 add_navbar_item($item);
-                $colorData['navnotice-id-' . $item->id] = $item->navcolor;
+
+                $backgroundColor = $item->backgroundcolor ?? '';
+                $textColor = $item->textcolor ?? '';
+
+                // Add item ID with both colours to the array
+                $navStyles[$item->id] = [
+                    'backgroundColor' => $backgroundColor,
+                    'textColor' => $textColor
+                ];
             } elseif ($item->type === 'notification') {
-                // Adding notifications
                 add_notification($item->content, $item->alerttype);
             }
         }
     }
 
-    // Inline JavaScript injection
-    inject_nav_colors($colorData);
-    
+    $navStylesJson = json_encode($navStyles, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+    $jsCode = <<<JS
+    document.addEventListener('DOMContentLoaded', function() {
+        var navItemColors = JSON.parse('$navStylesJson');
+        console.log('Parsed navItemColors:', navItemColors); // Log the parsed color data
+
+        for (var key in navItemColors) {
+            console.log('Processing key:', key); // Log the current key
+
+            var selector = 'li[data-key="navnotice-id-' + key + '"]';
+            console.log('Selector:', selector); // Log the selector being used
+
+            var navItems = document.querySelectorAll(selector);
+            console.log('Found navItems:', navItems); // Log the found navigation items
+
+            navItems.forEach(function(navItem) {
+                console.log('Applying background to:', navItem); // Log the specific <li> item being styled
+                navItem.style.backgroundColor = navItemColors[key].backgroundColor;
+
+                var link = navItem.querySelector('a'); // Select the <a> tag within the <li>
+                if (link) {
+                    console.log('Applying text color to:', link); // Log the specific <a> tag being styled
+                    link.style.color = navItemColors[key].textColor;
+                }
+
+                console.log('Applied backgroundColor:', navItemColors[key].backgroundColor);
+                console.log('Applied textColor:', navItemColors[key].textColor);
+            });
+        }
+    });
+    JS;
+
+    $PAGE->requires->js_init_code($jsCode);
+
+
+    // Include the JavaScript file
+    $PAGE->requires->js('/local/navnotice/js/navnotice.js');
 }
 
-function inject_nav_colors($colorData) {
-    global $PAGE;
-    if (!empty($colorData)) {
-        $colors_json = json_encode($colorData);
-        $jsCode = <<<JS
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            var navItemColors = JSON.parse('$colors_json');
-            for (var key in navItemColors) {
-                var navItems = document.querySelectorAll('li[data-key="' + key + '"]');
-                navItems.forEach(function(navItem) {
-                    navItem.style.backgroundColor = navItemColors[key];
-                });
-            }
-        });
-        
-JS;
-        $PAGE->requires->js_init_code($jsCode);
+function get_user_type_from_email($email) {
+    $student_pattern = get_config('local_navnotice', 'student_email_pattern');
+    $staff_pattern = get_config('local_navnotice', 'staff_email_pattern');
+
+    if (preg_match("/$student_pattern/", $email)) {
+        return 'student';
+    } elseif (preg_match("/$staff_pattern/", $email)) {
+        return 'staff';
+    } else {
+        return 'external';
     }
 }
+
+// function inject_nav_colors($colorData) {
+//     global $PAGE;
+//     if (!empty($colorData)) {
+//         $colors_json = json_encode($colorData);
+//         $jsCode = <<<JS
+//         document.addEventListener('DOMContentLoaded', function() {
+//             var navItemColors = JSON.parse('$colors_json');
+//             console.log('Parsed navItemColors:', navItemColors); // Log the parsed color data
+
+//             for (var key in navItemColors) {
+//                 console.log('Processing key:', key); // Log the current key
+
+//                 var selector = 'li[data-key="navnotice-id-' + key + '"]';
+//                 console.log('Selector:', selector); // Log the selector being used
+
+//                 var navItems = document.querySelectorAll(selector);
+//                 console.log('Found navItems:', navItems); // Log the found navigation items
+
+//                 navItems.forEach(function(navItem) {
+//                     console.log('Applying styles to:', navItem); // Log the specific item being styled
+//                     navItem.style.backgroundColor = navItemColors[key].backgroundColor;
+//                     navItem.style.color = navItemColors[key].textColor;
+//                     console.log('Applied backgroundColor:', navItemColors[key].backgroundColor);
+//                     console.log('Applied textColor:', navItemColors[key].textColor);
+//                 });
+//             }
+//         });
+// JS;
+//         $PAGE->requires->js_init_code($jsCode);
+//     }
+// }
 
 function add_navbar_item($item) {
     global $PAGE;
@@ -132,7 +167,6 @@ function add_navbar_item($item) {
     if ($node) {
         $node->showinflatnavigation = true; // Make sure it shows up in the flat navigation (Boost-based themes).
         
-        // Add a custom data attribute to store the navcolor
         $node->key = 'navnotice-id-'.$item->id;
         $node->title = $item->title;
     }

@@ -27,16 +27,11 @@ require_once($CFG->dirroot . '/local/navnotice/classes/form/edit_form.php');
 
 admin_externalpage_setup('local_navnotice_manage');
 
-$PAGE->set_title(get_string('managesettings', 'local_navnotice'));
-$PAGE->set_heading(get_string('managesettings', 'local_navnotice'));
-
-echo $OUTPUT->header();
-
 $editid = optional_param('edit', 0, PARAM_INT);
 $deleteid = optional_param('delete', 0, PARAM_INT);
 $addingnew = optional_param('add', 0, PARAM_BOOL);
 
-// Handle deletions
+// Handle deletions before any output
 if ($deleteid) {
     $DB->delete_records('local_navnotice_items', ['id' => $deleteid]);
     redirect(new moodle_url('/local/navnotice/manage.php'));
@@ -46,29 +41,7 @@ if ($deleteid) {
 $is_editing = $editid > 0;
 $mform = new manage_navnotice_form(null, ['is_editing' => $is_editing]);
 
-$showform = false;
-$formhtml = '';
-if ($editid) {
-    $record = $DB->get_record('local_navnotice_items', ['id' => $editid]);
-    if (!$record) {
-        print_error('errorrecordnotfound', 'local_navnotice', '', null, 'Record not found');
-    }
-
-    // Ensure editor content is correctly set
-    $record->content = ['text' => $record->content, 'format' => FORMAT_HTML];
-    $mform->set_data($record);
-    $showform = true;
-    ob_start();
-    $mform->display();
-    $formhtml = ob_get_clean();
-} elseif ($addingnew) {
-    $showform = true;
-    ob_start();
-    $mform->display();
-    $formhtml = ob_get_clean();
-}
-
-// Handle form submission
+// Handle form submission before any output
 if ($mform->is_cancelled()) {
     redirect(new moodle_url('/local/navnotice/manage.php'));
 } else if ($fromform = $mform->get_data()) {
@@ -82,10 +55,13 @@ if ($mform->is_cancelled()) {
     // Handling URL
     $record->url = !empty($fromform->url) ? $fromform->url : NULL;
 
-    // Handling navcolor
-    $record->navcolor = !empty($fromform->navcolor) ? $fromform->navcolor : NULL;
+    // Handling background colour
+    $record->backgroundcolor = (!empty($fromform->backgroundcolor) ? $fromform->backgroundcolor : '#FFFFFF');
 
-    // Handling editor content
+    // Handling text colour
+    $record->textcolor = (!empty($fromform->textcolor) ? $fromform->textcolor : '#000000');
+
+    // Handling icon
     $record->icon = !empty($fromform->icon) ? $fromform->icon : '';
 
     // Handling editor content
@@ -109,6 +85,32 @@ if ($mform->is_cancelled()) {
     redirect(new moodle_url('/local/navnotice/manage.php'));
 }
 
+// Now start page output
+$PAGE->set_title(get_string('managesettings', 'local_navnotice'));
+$PAGE->set_heading(get_string('managesettings', 'local_navnotice'));
+echo $OUTPUT->header();
+
+$showform = false;
+$formhtml = '';
+if ($editid) {
+    $record = $DB->get_record('local_navnotice_items', ['id' => $editid]);
+    if (!$record) {
+        print_error('errorrecordnotfound', 'local_navnotice', '', null, 'Record not found');
+    }
+
+    // Ensure editor content is correctly set
+    $record->content = ['text' => $record->content, 'format' => FORMAT_HTML];
+    $mform->set_data($record);
+    $showform = true;
+    ob_start();
+    $mform->display();
+    $formhtml = ob_get_clean();
+} elseif ($addingnew) {
+    $showform = true;
+    ob_start();
+    $mform->display();
+    $formhtml = ob_get_clean();
+}
 
 // Display existing entries with edit/delete options
 $entries = $DB->get_records('local_navnotice_items');
@@ -121,6 +123,9 @@ foreach ($entries as $entry) {
         echo html_writer::div('<strong>Title:</strong> ' . $entry->title, 'mb-1 cap');
         echo html_writer::div('<strong>URL:</strong> ' . '<a href="'.$entry->url.'" target="_blank">'.$entry->url.'</a>', 'mb-1');
         echo html_writer::div('<strong>Icon:</strong> ' . (!empty($entry->icon) ? '<i class="fa ' . $entry->icon . '"></i> ('. $entry->icon . ')' : 'None'), 'mb-1');
+
+        echo html_writer::div('<strong>Background Color:</strong> ' . $entry->backgroundcolor, 'mb-1');
+        echo html_writer::div('<strong>Text Color:</strong> ' . $entry->textcolor, 'mb-1');
     } else if ($entry->type === 'notification') {
         // Use format_text to safely display HTML content
         echo html_writer::div('<strong>Alert Type:</strong> ' . $entry->alerttype, 'mb-1 cap');
@@ -164,6 +169,7 @@ echo html_writer::script("
     document.addEventListener('DOMContentLoaded', function() {
         const addBtn = document.getElementById('addNewItemButton');
         const formContainer = document.getElementById('formContainer');
+
         if (addBtn) {
             addBtn.addEventListener('click', function() {
                 if (formContainer) {
@@ -178,88 +184,93 @@ echo html_writer::script("
             });
         }
 
-        // Add JavaScript to dynamically show/hide elements based on type
-        const typeElement = document.getElementById('id_type');
-        if (typeElement) {
-            typeElement.addEventListener('change', function() {
-                const selectedType = this.value;
-                updateVisibility(selectedType);
-                document.getElementById('id_type_hidden').value = selectedType; // Update hidden input
-            });
-            // Call updateVisibility on initial load to set correct visibility
-            updateVisibility(typeElement.value);
-        }
-
+        // Function to update visibility of form elements based on selected type
         function updateVisibility(type) {
             const titleElement = document.getElementById('fitem_id_title');
             const urlElement = document.getElementById('fitem_id_url');
             const iconElement = document.getElementById('fitem_id_icon');
             const contentElement = document.getElementById('fitem_id_content');
             const alerttypeElement = document.getElementById('fitem_id_alerttype');
-            const navcolorElement = document.getElementById('fitem_id_navcolor');
+            const backgroundcolorElement = document.getElementById('fitem_id_backgroundcolor');
+            const textcolorElement = document.getElementById('fitem_id_textcolor');
 
             if (type === 'navitem') {
                 titleElement.style.display = 'flex';
                 urlElement.style.display = 'flex';
                 iconElement.style.display = 'flex';
-                navcolorElement.style.display = 'flex';
+                backgroundcolorElement.style.display = 'flex';
+                textcolorElement.style.display = 'flex';
                 contentElement.style.display = 'none';
                 alerttypeElement.style.display = 'none';
             } else if (type === 'notification') {
                 titleElement.style.display = 'none';
                 urlElement.style.display = 'none';
                 iconElement.style.display = 'none';
-                navcolorElement.style.display = 'none';
+                backgroundcolorElement.style.display = 'none';
+                textcolorElement.style.display = 'none';
                 contentElement.style.display = 'flex';
                 alerttypeElement.style.display = 'flex';
             }
         }
-            const selectTypeElement = document.getElementById('id_type');
-    const selectAlertTypeElement = document.getElementById('id_alerttype');
 
-    // Function to update class on the contenteditable element
-    function updateClass() {
-        const contentEditableElement = document.querySelector('#id_contenteditable');
-        if (contentEditableElement) {
-            // Remove existing alert classes
-            contentEditableElement.classList.remove('alert-info', 'alert-success', 'alert-warning', 'alert-danger');
+        // Function to update class on the contenteditable element
+        function updateClass() {
+            const contentEditableElement = document.querySelector('#id_contenteditable');
+            if (contentEditableElement) {
+                // Remove existing alert classes
+                contentEditableElement.classList.remove('alert-info', 'alert-success', 'alert-warning', 'alert-danger');
 
-            // Add new class based on the selected alert type option
-            const selectedAlertValue = selectAlertTypeElement.value;
-            const alertClass = 'alert-' + selectedAlertValue;
-            contentEditableElement.classList.add(alertClass);
+                // Add new class based on the selected alert type option
+                const selectedAlertValue = selectAlertTypeElement ? selectAlertTypeElement.value : 'info';
+                const alertClass = 'alert-' + selectedAlertValue;
+                contentEditableElement.classList.add(alertClass);
 
-            // Update CSS styles
-            contentEditableElement.style.minHeight = '80px';
-            contentEditableElement.style.height = '80px';
-            contentEditableElement.style.padding = '.75rem 1.25rem';
-            contentEditableElement.style.border = '1px solid #8f959e';
-        }
-    }
-
-    // Monitor the DOM for changes and apply the class update if the contenteditable element exists
-    const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.addedNodes) {
-                updateClass();
+                // Update CSS styles
+                contentEditableElement.style.minHeight = '80px';
+                contentEditableElement.style.height = '80px';
+                contentEditableElement.style.padding = '.75rem 1.25rem';
+                contentEditableElement.style.border = '1px solid #8f959e';
             }
-        });
-    });
-
-    // Configuration for the observer (which parts of the DOM to monitor)
-    const config = { childList: true, subtree: true };
-    // Start observing the body for added elements
-    observer.observe(document.body, config);
-
-    // Handle type dropdown changes that may affect the rendering of contenteditable
-    selectTypeElement.addEventListener('change', function() {
-        if (this.value === 'notification') {
-            updateClass();
         }
-    });
 
-    // Ensure the class is updated based on initial load and dropdown changes
-    selectAlertTypeElement.addEventListener('change', updateClass);
+        // Monitor the DOM for changes and apply the class update if the contenteditable element exists
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.addedNodes) {
+                    updateClass();
+                }
+            });
+        });
+
+        // Configuration for the observer (which parts of the DOM to monitor)
+        const config = { childList: true, subtree: true };
+        observer.observe(document.body, config);
+
+        // Handling type and alert type elements if they exist
+        const selectTypeElement = document.getElementById('id_type');
+        const selectAlertTypeElement = document.getElementById('id_alerttype');
+
+        if (selectTypeElement) {
+            // Handle type dropdown changes that may affect the rendering of contenteditable
+            selectTypeElement.addEventListener('change', function() {
+                if (this.value === 'notification') {
+                    updateClass();
+                }
+                updateVisibility(this.value);
+                const hiddenTypeElement = document.getElementById('id_type_hidden');
+                if (hiddenTypeElement) {
+                    hiddenTypeElement.value = this.value; // Update hidden input
+                }
+            });
+
+            // Call updateVisibility on initial load to set correct visibility
+            updateVisibility(selectTypeElement.value);
+        }
+
+        if (selectAlertTypeElement) {
+            // Ensure the class is updated based on initial load and dropdown changes
+            selectAlertTypeElement.addEventListener('change', updateClass);
+        }
     });
 ");
 

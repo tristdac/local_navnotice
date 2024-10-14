@@ -23,8 +23,12 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'local_navnotice';
-$plugin->version = 2024071201;
-$plugin->requires = 2020110900; // Moodle 3.10 or higher.
-$plugin->maturity = MATURITY_STABLE;
-$plugin->release = '1.0';
+$capabilities = array(
+    'local/navnotice:manage' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => array(
+            'manager' => CAP_ALLOW,
+        ),
+    ),
+);

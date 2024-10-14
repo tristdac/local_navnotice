@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XMLDB PATH="local/navnotice/db" VERSION="2024071200" COMMENT="XMLDB file for Moodle local/navnotice plugin"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+    <TABLES>
+        <TABLE NAME="local_navnotice_items" COMMENT="Stores navbar items and notifications configurations for different user types">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="Standard Moodle primary key"/>
+                <FIELD NAME="type" TYPE="char" LENGTH="20" NOTNULL="true" ENUM="true" SEQUENCE="false" COMMENT="Type of the item: navitem or notification">
+                    <ENUMVALUES>
+                        <ENUMVALUE>navitem</ENUMVALUE>
+                        <ENUMVALUE>notification</ENUMVALUE>
+                    </ENUMVALUES>
+                </FIELD>
+                <FIELD NAME="usertype" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Type of user the item is visible to"/>
+                <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Title of for navbar item, if applicable"/>
+                <FIELD NAME="url" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="URL for navbar items, if applicable"/>
+                <FIELD NAME="navcolor" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="Color for the nav item"/>
+                <FIELD NAME="icon" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Icon for navbar items, if applicable"/>
+                <FIELD NAME="content" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Content of the notification, if applicable"/>
+                <FIELD NAME="alerttype" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Type of alert for notifications, if applicable"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="type_idx" UNIQUE="false" FIELDS="type"/>
+            </INDEXES>
+        </TABLE>
+    </TABLES>
+</XMLDB>
