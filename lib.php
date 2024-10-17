@@ -67,29 +67,16 @@ function local_navnotice_before_http_headers() {
     $jsCode = <<<JS
     document.addEventListener('DOMContentLoaded', function() {
         var navItemColors = JSON.parse('$navStylesJson');
-        console.log('Parsed navItemColors:', navItemColors); // Log the parsed color data
-
         for (var key in navItemColors) {
-            console.log('Processing key:', key); // Log the current key
-
             var selector = 'li[data-key="navnotice-id-' + key + '"]';
-            console.log('Selector:', selector); // Log the selector being used
-
             var navItems = document.querySelectorAll(selector);
-            console.log('Found navItems:', navItems); // Log the found navigation items
-
             navItems.forEach(function(navItem) {
-                console.log('Applying background to:', navItem); // Log the specific <li> item being styled
                 navItem.style.backgroundColor = navItemColors[key].backgroundColor;
 
                 var link = navItem.querySelector('a'); // Select the <a> tag within the <li>
                 if (link) {
-                    console.log('Applying text color to:', link); // Log the specific <a> tag being styled
                     link.style.color = navItemColors[key].textColor;
                 }
-
-                console.log('Applied backgroundColor:', navItemColors[key].backgroundColor);
-                console.log('Applied textColor:', navItemColors[key].textColor);
             });
         }
     });
@@ -114,38 +101,6 @@ function get_user_type_from_email($email) {
         return 'external';
     }
 }
-
-// function inject_nav_colors($colorData) {
-//     global $PAGE;
-//     if (!empty($colorData)) {
-//         $colors_json = json_encode($colorData);
-//         $jsCode = <<<JS
-//         document.addEventListener('DOMContentLoaded', function() {
-//             var navItemColors = JSON.parse('$colors_json');
-//             console.log('Parsed navItemColors:', navItemColors); // Log the parsed color data
-
-//             for (var key in navItemColors) {
-//                 console.log('Processing key:', key); // Log the current key
-
-//                 var selector = 'li[data-key="navnotice-id-' + key + '"]';
-//                 console.log('Selector:', selector); // Log the selector being used
-
-//                 var navItems = document.querySelectorAll(selector);
-//                 console.log('Found navItems:', navItems); // Log the found navigation items
-
-//                 navItems.forEach(function(navItem) {
-//                     console.log('Applying styles to:', navItem); // Log the specific item being styled
-//                     navItem.style.backgroundColor = navItemColors[key].backgroundColor;
-//                     navItem.style.color = navItemColors[key].textColor;
-//                     console.log('Applied backgroundColor:', navItemColors[key].backgroundColor);
-//                     console.log('Applied textColor:', navItemColors[key].textColor);
-//                 });
-//             }
-//         });
-// JS;
-//         $PAGE->requires->js_init_code($jsCode);
-//     }
-// }
 
 function add_navbar_item($item) {
     global $PAGE;

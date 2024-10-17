@@ -13,12 +13,13 @@
                     </ENUMVALUES>
                 </FIELD>
                 <FIELD NAME="usertype" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Type of user the item is visible to"/>
-                <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Title of for navbar item, if applicable"/>
+                <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Title for navbar item, if applicable"/>
                 <FIELD NAME="url" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="URL for navbar items, if applicable"/>
-                <FIELD NAME="navcolor" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="Color for the nav item"/>
                 <FIELD NAME="icon" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Icon for navbar items, if applicable"/>
                 <FIELD NAME="content" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Content of the notification, if applicable"/>
                 <FIELD NAME="alerttype" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Type of alert for notifications, if applicable"/>
+                <FIELD NAME="backgroundcolor" TYPE="char" LENGTH="7" NOTNULL="false" SEQUENCE="false" COMMENT="Background color for navbar item"/>
+                <FIELD NAME="textcolor" TYPE="char" LENGTH="7" NOTNULL="false" SEQUENCE="false" COMMENT="Text color for navbar item"/>
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
