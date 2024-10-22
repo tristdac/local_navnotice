@@ -93,9 +93,9 @@ function get_user_type_from_email($email) {
     $student_pattern = get_config('local_navnotice', 'student_email_pattern');
     $staff_pattern = get_config('local_navnotice', 'staff_email_pattern');
 
-    if (preg_match("/$student_pattern/", $email)) {
+    if (preg_match("/$student_pattern/i", $email)) {
         return 'student';
-    } elseif (preg_match("/$staff_pattern/", $email)) {
+    } elseif (preg_match("/$staff_pattern/i", $email)) {
         return 'staff';
     } else {
         return 'external';
